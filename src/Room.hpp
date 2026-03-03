@@ -15,6 +15,7 @@ public:
     char GetLocation(Vec2 _pos);
     void ClearLocation(Vec2 _pos);
     void OpenDoor(Vec2 _pos);
+    void TrySpawnChest();
 private:
     std::vector<Entity*> m_entities;
     Player* m_player = nullptr;

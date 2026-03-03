@@ -54,4 +54,33 @@ void Player::Update() {
     if (room->GetLocation(tryPos) == 'D') {
         room->OpenDoor(tryPos);
     }
+
+    if (room->GetLocation(tryPos) == 'L'){
+        if (m_keyCount > 0)
+        {
+            m_keyCount--;
+            printf("You used a key to open the door! Keys remaining: %d\n", m_keyCount);
+            room->OpenDoor(tryPos);
+        }
+        else
+        {
+             printf("The door is locked! You need a key.\n");
+        }
+    }
+
+    if (room->GetLocation(tryPos) == 'T')
+    {
+        if (m_keyCount > 0)
+        {
+            m_keyCount--;
+            printf("You used a key to open the chest! Keys remaining: %d\n", m_keyCount);
+            room->ClearLocation(tryPos);
+            // reward here — e.g. add gold, item, etc.
+        }
+        else
+        {
+
+            printf("The chest is locked! You need a key.\n");
+        }
+    }
 }

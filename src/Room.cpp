@@ -91,6 +91,7 @@ void Room::Load(std::string _path)
             }
         }
     }
+    TrySpawnChest();
 }
 
 void Room::Update()
@@ -147,7 +148,42 @@ void Room::OpenDoor(Vec2 _pos)
     {
         if (m_doors[i].pos == _pos)
         {
-            Load(m_doors[i].path.c_str());
+            std::string path = m_doors[i].path; // copy it first
+            Load(path);                          // now safe
+            return;                              // stop iterating, doors are gone
         }
     }
 }
+
+void Room::TrySpawnChest()
+{
+    if (rand()% 100 >= 20)
+        return;
+
+        std::vector<Vec2> openTiles;
+        Vec2 playerPos = m_player->GetPosition();
+
+        for (int y = 0; y < m_map.size(); y++)
+        {
+            for (int x = 0; x < m_map[y].size(); x++)
+            {
+                if (m_map[y][x] == ' ' && Vec2(x, y) != playerPos)
+                    openTiles.push_back(Vec2(x, y));
+            }
+        }
+
+        if (openTiles.size() < 2)
+            return;
+
+        int chestIndex = rand() % openTiles.size();
+        Vec2 chestPos = openTiles[chestIndex];
+        m_map[chestPos.y][chestPos.x] = 'T';
+        openTiles.erase(openTiles.begin() + chestIndex);
+
+        int keyIndex = rand() % openTiles.size();
+        Vec2 keyPos = openTiles[keyIndex];
+        m_map[keyPos.y][keyPos.x] = 'K';
+    
+
+}
+
