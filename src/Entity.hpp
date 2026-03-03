@@ -1,6 +1,6 @@
 #pragma once
-
 #include "fogpi/Math.hpp"
+#include "Dice.hpp"
 
 class Room;
 
@@ -13,6 +13,7 @@ class Entity {
 
         Vec2 GetPosition() { return m_position; };
         char Draw() { return m_character; }
+        std::vector<Die> dice;
 
     protected:
         Vec2 m_position;

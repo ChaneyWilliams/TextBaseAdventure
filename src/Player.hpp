@@ -7,6 +7,8 @@ class Player : public Entity
 public:
     void Start(Vec2 _pos);
     void Update();
+    int health = 100;
+    int strength = 1;
 private:
     int m_keyCount = 0;
 };

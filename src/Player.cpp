@@ -5,6 +5,8 @@
 void Player::Start(Vec2 _pos) {
     m_character = 'P';
     m_position = _pos;
+    dice.push_back((Die){.sides = 10});
+
 }
 
 void Player::Update() {
@@ -82,5 +84,13 @@ void Player::Update() {
 
             printf("The chest is locked! You need a key.\n");
         }
+    }
+    if(room->GetLocation(tryPos) == 'M')
+    {   
+        room->Combat(tryPos);
+        if(health > 0){
+            m_position = tryPos;
+        }
+
     }
 }

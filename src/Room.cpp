@@ -1,9 +1,12 @@
+#include "Dice.hpp"
 #include "Room.hpp"
 
 #include "Player.hpp"
+#include "Monster.hpp"
 
 #include <fstream>
 #include <string>
+RollStats RollDice(std::vector<Die> _dice);
 
 void Room::Load(std::string _path)
 {
@@ -44,7 +47,7 @@ void Room::Load(std::string _path)
         if (word == "map")
         {
             m_map.push_back(std::vector<char>());
-            while(file >> word)
+            while (file >> word)
             {
                 if (word == "-2")
                 {
@@ -61,7 +64,6 @@ void Room::Load(std::string _path)
                     m_map[m_map.size() - 1].push_back(' ');
                 else
                     m_map[m_map.size() - 1].push_back(word[0]);
-                
             }
         }
     }
@@ -75,8 +77,8 @@ void Room::Load(std::string _path)
             {
                 if (m_player == nullptr)
                     m_player = new Player();
-                
-                m_player->Start(Vec2(x,y));
+
+                m_player->Start(Vec2(x, y));
                 m_map[y][x] = ' ';
             }
 
@@ -88,6 +90,12 @@ void Room::Load(std::string _path)
                     m_doors[doorCount].pos.y = y;
                     doorCount++;
                 }
+            }
+            if(m_map[y][x] == 'M'){
+                Monster* monster = new Monster();
+                monster->Start(Vec2(x,y));
+                m_monsters.push_back(monster);
+
             }
         }
     }
@@ -120,14 +128,14 @@ char Room::GetLocation(Vec2 _pos)
 {
     if (_pos.y >= m_map.size())
         return ' ';
-    
+
     if (_pos.x >= m_map[_pos.y].size())
         return ' ';
 
     if (m_player != nullptr)
         if (m_player->GetPosition() == _pos)
             return m_player->Draw();
-    
+
     return m_map[_pos.y][_pos.x];
 }
 
@@ -135,55 +143,92 @@ void Room::ClearLocation(Vec2 _pos)
 {
     if (_pos.y >= m_map.size())
         return;
-    
+
     if (_pos.x >= m_map[_pos.y].size())
         return;
-    
+
     m_map[_pos.y][_pos.x] = ' ';
 }
 
 void Room::OpenDoor(Vec2 _pos)
 {
-    for(int i = 0; i < m_doors.size(); i++)
+    for (int i = 0; i < m_doors.size(); i++)
     {
         if (m_doors[i].pos == _pos)
         {
             std::string path = m_doors[i].path; // copy it first
-            Load(path);                          // now safe
-            return;                              // stop iterating, doors are gone
+            Load(path);                         // now safe
+            return;                             // stop iterating, doors are gone
         }
     }
 }
 
 void Room::TrySpawnChest()
 {
-    if (rand()% 100 >= 20)
+    if (rand() % 100 >= 20)
         return;
 
-        std::vector<Vec2> openTiles;
-        Vec2 playerPos = m_player->GetPosition();
+    std::vector<Vec2> openTiles;
+    Vec2 playerPos = m_player->GetPosition();
 
-        for (int y = 0; y < m_map.size(); y++)
+    for (int y = 0; y < m_map.size(); y++)
+    {
+        for (int x = 0; x < m_map[y].size(); x++)
         {
-            for (int x = 0; x < m_map[y].size(); x++)
-            {
-                if (m_map[y][x] == ' ' && Vec2(x, y) != playerPos)
-                    openTiles.push_back(Vec2(x, y));
-            }
+            if (m_map[y][x] == ' ' && Vec2(x, y) != playerPos)
+                openTiles.push_back(Vec2(x, y));
         }
+    }
 
-        if (openTiles.size() < 2)
-            return;
+    if (openTiles.size() < 2)
+        return;
 
-        int chestIndex = rand() % openTiles.size();
-        Vec2 chestPos = openTiles[chestIndex];
-        m_map[chestPos.y][chestPos.x] = 'T';
-        openTiles.erase(openTiles.begin() + chestIndex);
+    int chestIndex = rand() % openTiles.size();
+    Vec2 chestPos = openTiles[chestIndex];
+    m_map[chestPos.y][chestPos.x] = 'T';
+    openTiles.erase(openTiles.begin() + chestIndex);
 
-        int keyIndex = rand() % openTiles.size();
-        Vec2 keyPos = openTiles[keyIndex];
-        m_map[keyPos.y][keyPos.x] = 'K';
-    
-
+    int keyIndex = rand() % openTiles.size();
+    Vec2 keyPos = openTiles[keyIndex];
+    m_map[keyPos.y][keyPos.x] = 'K';
 }
 
+void Room::Combat(Vec2 _pos)
+{   
+
+    Monster* fighter = nullptr;
+
+    for (Monster* monster : m_monsters)
+    {
+        if (monster->GetPosition() == _pos)
+        {
+            fighter = monster;
+            break;
+        }
+    }
+
+    if (!fighter)
+    {
+        printf("No monster found!\n");
+        return;
+    }
+
+    while (m_player->health > 0 && fighter->health > 0)
+    {
+        RollStats playerRoll = RollDice(m_player->dice);
+        RollStats monsterRoll = RollDice(fighter->dice);
+
+        if (playerRoll.total + m_player->strength >= monsterRoll.total)
+        {
+            fighter->health -= 10;
+        }
+        else
+        {
+            m_player->health -= 10;
+        }
+    }
+    if(fighter->health <= 0){
+        ClearLocation(_pos);
+    }
+    printf("Current Health: %i\n", m_player->health);
+}

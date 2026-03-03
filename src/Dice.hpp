@@ -16,27 +16,9 @@ struct RollStats
     int critCount = 0;
     int total = 0;
 };
-
-RollStats RollDice(std::vector<Die> _dice)
+class Dice
 {
-    RollStats stats = {};
-
-    for (Die d : _dice)
-    {
-        stats.min += 1;
-        stats.max += d.sides;
-
-        int roll = random_int(1, d.sides);//1 + rand() % d.sides;
-
-        stats.total += roll;
-
-        if (roll > stats.greatest)
-            stats.greatest = roll;
-        
-        if (roll == d.sides)
-            stats.critCount++;
-    }
-
-    return stats;
-}
-
+    
+public:
+    RollStats RollDice(std::vector<Die> _dice);
+};
