@@ -2,7 +2,9 @@
 #include "Room.hpp"
 
 #include "Player.hpp"
-#include "Monster.hpp"
+
+#include "Monsters/Goblin.hpp"
+#include "Monsters/Skeleton.hpp"
 
 #include <fstream>
 #include <string>
@@ -91,11 +93,12 @@ void Room::Load(std::string _path)
                     doorCount++;
                 }
             }
-            if(m_map[y][x] == 'M'){
-                Monster* monster = new Monster();
-                monster->Start(Vec2(x,y));
+            if (m_map[y][x] == 'M')
+            {
+                Monster *monster = (rand() % 2 == 0) ? (Monster *)new Skeleton() : (Monster *)new Goblin();
+                monster->Start(Vec2(x, y));
                 m_monsters.push_back(monster);
-
+                m_map[y][x] = ' ';
             }
         }
     }
@@ -109,6 +112,11 @@ void Room::Update()
     {
         m_player->room = this;
         m_player->Update();
+        for (Monster *monster : m_monsters)
+        {
+            monster->room = this;
+            monster->Update();
+        }
     }
 }
 
@@ -126,6 +134,7 @@ void Room::Draw()
 
 char Room::GetLocation(Vec2 _pos)
 {
+
     if (_pos.y >= m_map.size())
         return ' ';
 
@@ -135,7 +144,13 @@ char Room::GetLocation(Vec2 _pos)
     if (m_player != nullptr)
         if (m_player->GetPosition() == _pos)
             return m_player->Draw();
-
+    for (Monster *monster : m_monsters)
+    {
+        if (monster->GetPosition() == _pos)
+        {
+            return monster->Draw();
+        }
+    }
     return m_map[_pos.y][_pos.x];
 }
 
@@ -194,11 +209,11 @@ void Room::TrySpawnChest()
 }
 
 void Room::Combat(Vec2 _pos)
-{   
+{
 
-    Monster* fighter = nullptr;
+    Monster *fighter = nullptr;
 
-    for (Monster* monster : m_monsters)
+    for (Monster *monster : m_monsters)
     {
         if (monster->GetPosition() == _pos)
         {
@@ -218,7 +233,7 @@ void Room::Combat(Vec2 _pos)
         RollStats playerRoll = RollDice(m_player->dice);
         RollStats monsterRoll = RollDice(fighter->dice);
 
-        if (playerRoll.total + m_player->strength >= monsterRoll.total)
+        if (playerRoll.total + m_player->strength >= monsterRoll.total + fighter->strength)
         {
             fighter->health -= 10;
         }
@@ -227,8 +242,13 @@ void Room::Combat(Vec2 _pos)
             m_player->health -= 10;
         }
     }
-    if(fighter->health <= 0){
-        ClearLocation(_pos);
+    for (int i = m_monsters.size() - 1; i >= 0; --i)
+    {
+        if (m_monsters[i]->health <= 0)
+        {
+            delete m_monsters[i];
+            m_monsters.erase(m_monsters.begin() + i);
+        }
     }
-    printf("Current Health: %i\n", m_player->health);
+    printf("Player Current Health: %i\n", m_player->health);
 }

@@ -85,9 +85,10 @@ void Player::Update() {
             printf("The chest is locked! You need a key.\n");
         }
     }
-    if(room->GetLocation(tryPos) == 'M')
+    if(room->GetLocation(tryPos) == 'G' || room->GetLocation(tryPos) == 'B')
     {   
         room->Combat(tryPos);
+        //probably a better way to move the player over where the fight was but...
         if(health > 0){
             m_position = tryPos;
         }
