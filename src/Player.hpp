@@ -9,8 +9,10 @@ public:
     void Update();
     void Death();
     void Healing();
+    int health = 100;
+    int gold = 0;
+    int strength = 1;
+    int level = 1;
 private:
     int m_keyCount = 0;
-    int m_goldCount = 0;
-    int m_health = 100;
 };

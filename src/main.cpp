@@ -49,8 +49,6 @@ int main(int argc, char *argv[])
     dice.push_back(die);
     dice.push_back(die);
     dice.push_back(die);
-
-    RollStats stats = RollDice(dice);
     */
     
     return 0;
