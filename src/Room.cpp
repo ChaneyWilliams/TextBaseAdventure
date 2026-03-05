@@ -263,6 +263,11 @@ void Room::Combat(Vec2 _pos)
             leave = request_char("Press c for next round");
         }while(leave != 'c');
     }
+    // just deleting the monster at health = 0
+    // the vector complicates things just a little bit because
+    // it stores pointers so even if we delete just the monster object
+    // the vector will still reference the dead pointer. So just we're
+    // just deleting the Monster AND the pointer (plus it catches anything else that should be dead)
     for (int i = m_monsters.size() - 1; i >= 0; --i)
     {
         if (m_monsters[i]->health <= 0)
@@ -275,9 +280,10 @@ void Room::Combat(Vec2 _pos)
         //die funct;
     }
     else{
+        m_player->gold += rand() % 11;
         m_player->strength++;
         printf("Player Won!\nLevel Up!\nStrength: %i\n", m_player->strength);
-        printf("Player Current Health: %i\nPlayer Gold: %i\n", m_player->health, m_player->gold);
+        printf("Player Current Health: %i\nPlayer Got Gold: %i\n", m_player->health, m_player->gold);
         do{
             leave = request_char("Press c to continue");
         }while(leave != 'c');
