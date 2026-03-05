@@ -5,6 +5,7 @@
 class Monster : public Entity
 {
 public:
+    const char* name;
     bool dead = false;
     int health = 10;
     int strength = 0;

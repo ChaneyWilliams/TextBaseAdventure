@@ -2,25 +2,30 @@
 #include "Room.hpp"
 #include "fogpi/io.hpp"
 
-void Player::Start(Vec2 _pos) {
+void Player::Start(Vec2 _pos)
+{
     m_character = 'P';
     m_position = _pos;
-    dice.push_back((Die){.sides = 10});
-
+    if (dice.size() == 0)
+    {
+        dice.push_back((Die){.sides = 10});
+    }
 }
 
-void Player::Update() {
-    //while(request_char("hit w to continue: ") != 'w') {}
+void Player::Update()
+{
+    // while(request_char("hit w to continue: ") != 'w') {}
 
     char directionInput;
 
-    do {
+    do
+    {
         directionInput = request_char("wasd and Enter to move");
     } while (directionInput != 'w' &&
              directionInput != 'a' &&
              directionInput != 's' &&
              directionInput != 'd');
-    
+
     Vec2 direction(0.0f);
 
     switch (directionInput)
@@ -44,20 +49,24 @@ void Player::Update() {
 
     Vec2 tryPos = m_position + direction;
 
-    if (room->GetLocation(tryPos) == 'K') {
+    if (room->GetLocation(tryPos) == 'K')
+    {
         m_keyCount++;
         room->ClearLocation(tryPos);
     }
 
-    if (room->GetLocation(tryPos) == ' ') {
+    if (room->GetLocation(tryPos) == ' ')
+    {
         m_position = tryPos;
     }
 
-    if (room->GetLocation(tryPos) == 'D') {
+    if (room->GetLocation(tryPos) == 'D')
+    {
         room->OpenDoor(tryPos);
     }
 
-    if (room->GetLocation(tryPos) == 'L'){
+    if (room->GetLocation(tryPos) == 'L')
+    {
         if (m_keyCount > 0)
         {
             m_keyCount--;
@@ -66,7 +75,7 @@ void Player::Update() {
         }
         else
         {
-             printf("The door is locked! You need a key.\n");
+            printf("The door is locked! You need a key.\n");
         }
     }
 
@@ -85,13 +94,13 @@ void Player::Update() {
             printf("The chest is locked! You need a key.\n");
         }
     }
-    if(room->GetLocation(tryPos) == 'G' || room->GetLocation(tryPos) == 'B')
-    {   
+    if (room->GetLocation(tryPos) == 'G' || room->GetLocation(tryPos) == 'B')
+    {
         room->Combat(tryPos);
-        //probably a better way to move the player over where the fight was but...
-        if(health > 0){
+        // probably a better way to move the player over where the fight was but...
+        if (health > 0)
+        {
             m_position = tryPos;
         }
-
     }
 }

@@ -83,7 +83,13 @@ void Room::Load(std::string _path)
                 m_player->Start(Vec2(x, y));
                 m_map[y][x] = ' ';
             }
-
+            if (m_map[y][x] == 'M')
+            {
+                Monster *monster = (rand() % 2 == 0) ? (Monster *)new Skeleton() : (Monster *)new Goblin();
+                monster->Start(Vec2(x, y));
+                m_monsters.push_back(monster);
+                m_map[y][x] = ' ';
+            }
             if (m_map[y][x] == 'D' || m_map[y][x] == 'L')
             {
                 if (m_doors.size() - 1 >= doorCount)
@@ -91,14 +97,11 @@ void Room::Load(std::string _path)
                     m_doors[doorCount].pos.x = x;
                     m_doors[doorCount].pos.y = y;
                     doorCount++;
+                    if (m_monsters.size() > 0)
+                    {
+                        m_map[y][x] = 'L';
+                    }
                 }
-            }
-            if (m_map[y][x] == 'M')
-            {
-                Monster *monster = (rand() % 2 == 0) ? (Monster *)new Skeleton() : (Monster *)new Goblin();
-                monster->Start(Vec2(x, y));
-                m_monsters.push_back(monster);
-                m_map[y][x] = ' ';
             }
         }
     }
@@ -112,12 +115,22 @@ void Room::Update()
     {
         m_player->room = this;
         m_player->Update();
-        for (Monster *monster : m_monsters)
+        if (m_monsters.size() > 0)
         {
-            monster->room = this;
-            monster->Update();
+            for (Monster *monster : m_monsters)
+            {
+                monster->room = this;
+                monster->Update();
+            }
+        }
+        else
+        {
+            for(Door door : m_doors){
+                m_map[door.pos.y][door.pos.x] = 'D';
+            }
         }
     }
+
 }
 
 void Room::Draw()
@@ -171,12 +184,13 @@ void Room::OpenDoor(Vec2 _pos)
     {
         if (m_doors[i].pos == _pos)
         {
+            printf("door\n");
             std::string path = m_doors[i].path; // copy it first
             Load(path);                         // now safe
             return;                             // stop iterating, doors are gone
         }
     }
-}
+}char leave;
 
 void Room::TrySpawnChest()
 {
@@ -227,20 +241,27 @@ void Room::Combat(Vec2 _pos)
         printf("No monster found!\n");
         return;
     }
-
+    char leave;
+    printf("FIGHT\n");
     while (m_player->health > 0 && fighter->health > 0)
     {
         RollStats playerRoll = RollDice(m_player->dice);
         RollStats monsterRoll = RollDice(fighter->dice);
+        printf("Player: %i, Monster %i\n", playerRoll.total + m_player->strength, monsterRoll.total + fighter->strength);
 
         if (playerRoll.total + m_player->strength >= monsterRoll.total + fighter->strength)
         {
             fighter->health -= 10;
+            printf("Monster Lost 10 Health\n");
         }
         else
         {
             m_player->health -= 10;
+            printf("Player Lost 10 Health\n");
         }
+        do{
+            leave = request_char("Press c for next round");
+        }while(leave != 'c');
     }
     for (int i = m_monsters.size() - 1; i >= 0; --i)
     {
@@ -250,5 +271,16 @@ void Room::Combat(Vec2 _pos)
             m_monsters.erase(m_monsters.begin() + i);
         }
     }
-    printf("Player Current Health: %i\n", m_player->health);
+    if(m_player->health <= 0){
+        //die funct;
+    }
+    else{
+        m_player->strength++;
+        printf("Player Won!\nLevel Up!\nStrength: %i\n", m_player->strength);
+        printf("Player Current Health: %i\nPlayer Gold: %i\n", m_player->health, m_player->gold);
+        do{
+            leave = request_char("Press c to continue");
+        }while(leave != 'c');
+    }
+    
 }
