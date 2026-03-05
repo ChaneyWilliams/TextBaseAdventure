@@ -7,7 +7,6 @@
 
 #include "fogpi/Math.hpp"
 
-#include "Dice.hpp"
 #include "Room.hpp"
 #include "Entity.hpp"
 

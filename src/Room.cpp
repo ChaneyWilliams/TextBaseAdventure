@@ -10,7 +10,7 @@
 
 #include <fstream>
 
-
+RollStats RollDice(std::vector<Die> _dice);
 void Room::Load(std::string _path)
 {
     m_map.clear();
@@ -84,13 +84,12 @@ void Room::Load(std::string _path)
                 m_player->Start(Vec2(x, y));
                 m_map[y][x] = ' ';
             }
-            //if (m_map[y][x] == 'M')
-            //{
-            //    Monster *monster = (rand() % 2 == 0) ? (Monster *)new Skeleton() : (Monster *)new Goblin();
-            //    monster->Start(Vec2(x, y));
-            //    m_monsters.push_back(monster);
-            //    m_map[y][x] = ' ';
-            //}
+            if (m_map[y][x] == 'M'){
+                            Monster *monster = (rand() % 2 == 0) ? (Monster *)new Skeleton() : (Monster *)new Goblin();
+                monster->Start(Vec2(x, y));
+                m_monsters.push_back(monster);
+                m_map[y][x] = ' ';
+            }
             if (m_map[y][x] == 'D' || m_map[y][x] == 'L')
             {
                 if (m_doors.size() - 1 >= doorCount)
@@ -189,7 +188,7 @@ void Room::OpenDoor(Vec2 _pos)
             std::string path = m_doors[i].path; // copy it first
             Load(path);                        // now safe
             if (rand() % 100 >= 20){
-                m_player -> Healing();
+                //m_player -> Healing();
                 printf("You healed\n");
             }
             return;                              // stop iterating, doors are gone
@@ -230,68 +229,68 @@ void Room::TrySpawnChest()
 
 void Room::Combat(Vec2 _pos)
 {
-    ///printf("Hello");
-    ///Monster *fighter = nullptr;
-///
-    ///for (Monster *monster : m_monsters)
-    ///{
-    ///    if (monster->GetPosition() == _pos)
-    ///    {
-    ///        fighter = monster;
-    ///        break;
-    ///    }
-    ///}
-///
-    ///if (!fighter)
-    ///{
-    ///    printf("No monster found!\n");
-    ///    return;
-    ///}
-    ///char leave;
-    ///printf("FIGHT\n");
-    ///while (m_player->health > 0 && fighter->health > 0)
-    ///{
-    ///    RollStats playerRoll = RollDice(m_player->dice);
-    ///    RollStats monsterRoll = RollDice(fighter->dice);
-    ///    printf("Player: %i, Monster %i\n", playerRoll.total + m_player->strength, monsterRoll.total + fighter->strength);
-///
-    ///    if (playerRoll.total + m_player->strength >= monsterRoll.total + fighter->strength)
-    ///    {
-    ///        fighter->health -= 10;
-    ///        printf("Monster Lost 10 Health\n");
-    ///    }
-    ///    else
-    ///    {
-    ///        m_player->health -= 10;
-    ///        printf("Player Lost 10 Health\n");
-    ///    }
-    ///    do{
-    ///        leave = request_char("Press c for next round");
-    ///    }while(leave != 'c');
-    ///}
-    ///// just deleting the monster at health = 0
-    ///// the vector complicates things just a little bit because
-    ///// it stores pointers so even if we delete just the monster object
-    ///// the vector will still reference the dead pointer. So just we're
-    ///// just deleting the Monster AND the pointer (plus it catches anything else that should be dead)
-    ///for (int i = m_monsters.size() - 1; i >= 0; --i)
-    ///{
-    ///    if (m_monsters[i]->health <= 0)
-    ///    {
-    ///        delete m_monsters[i];
-    ///        m_monsters.erase(m_monsters.begin() + i);
-    ///    }
-    ///}
-    ///if(m_player->health <= 0){
-    ///    //die funct;
-    ///}
-    ///else{
-    ///    m_player->gold += rand() % 11;
-    ///    m_player->strength++;
-    ///    printf("Player Won!\nLevel Up!\nStrength: %i\n", m_player->strength);
-    ///    printf("Player Current Health: %i\nPlayer Got Gold: %i\n", m_player->health, m_player->gold);
-    ///    do{
-    ///        leave = request_char("Press c to continue");
-    ///    }while(leave != 'c');
-    ///}
-}///
+    printf("Hello");
+    Monster *fighter = nullptr;
+
+    for (Monster *monster : m_monsters)
+    {
+        if (monster->GetPosition() == _pos)
+        {
+            fighter = monster;
+            break;
+        }
+    }
+
+    if (!fighter)
+    {
+        printf("No monster found!\n");
+        return;
+    }
+    char leave;
+    printf("FIGHT\n");
+    while (m_player->health > 0 && fighter->health > 0)
+    {
+        RollStats playerRoll = RollDice(m_player->dice);
+        RollStats monsterRoll = RollDice(fighter->dice);
+        printf("Player: %i, Monster %i\n", playerRoll.total + m_player->strength, monsterRoll.total + fighter->strength);
+
+        if (playerRoll.total + m_player->strength >= monsterRoll.total + fighter->strength)
+        {
+            fighter->health -= 10;
+            printf("Monster Lost 10 Health\n");
+        }
+        else
+        {
+            m_player->health -= 10;
+            printf("Player Lost 10 Health\n");
+        }
+        do{
+            leave = request_char("Press c for next round");
+        }while(leave != 'c');
+    }
+    // just deleting the monster at health = 0
+    // the vector complicates things just a little bit because
+    // it stores pointers so even if we delete just the monster object
+    // the vector will still reference the dead pointer. So just we're
+    // just deleting the Monster AND the pointer (plus it catches anything else that should be dead)
+    for (int i = m_monsters.size() - 1; i >= 0; --i)
+    {
+        if (m_monsters[i]->health <= 0)
+        {
+            delete m_monsters[i];
+            m_monsters.erase(m_monsters.begin() + i);
+        }
+    }
+    if(m_player->health <= 0){
+        m_player->Death();
+    }
+    else{
+        m_player->gold += rand() % 11;
+        //m_player->strength++;
+        printf("Player Won!\nLevel Up!\nStrength: %i\n", m_player->strength);
+        printf("Player Current Health: %i\nPlayer Got Gold: %i\n", m_player->health, m_player->gold);
+        do{
+            leave = request_char("Press c to continue");
+        }while(leave != 'c');
+    }
+}

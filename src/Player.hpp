@@ -9,7 +9,7 @@ public:
     void Update();
     void Death();
     void Healing();
-    int health = 100;
+    int health = 10;
     int gold = 0;
     int strength = 1;
     int level = 1;
