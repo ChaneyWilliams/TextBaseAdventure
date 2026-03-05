@@ -68,14 +68,17 @@ void Player::Update() {
         }
     }
 
+    
     if (room->GetLocation(tryPos) == 'T')
     {
+        
         if (m_keyCount > 0)
         {
             m_keyCount--;
             printf("You used a key to open the chest! Keys remaining: %d\n", m_keyCount);
             room->ClearLocation(tryPos);
-            // reward here — e.g. add gold, item, etc.
+            m_goldCount += 100;
+
         }
         else
         {
@@ -84,3 +87,18 @@ void Player::Update() {
         }
     }
 }
+
+void Player::Death()
+{
+    if(m_health<=0)
+    {
+        printf("Your Gold Count Was:  %d\n", m_goldCount);
+        exit(1);
+    }
+}
+
+void Player:: Healing()
+{
+    m_health += 20;
+}
+

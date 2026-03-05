@@ -149,7 +149,11 @@ void Room::OpenDoor(Vec2 _pos)
         if (m_doors[i].pos == _pos)
         {
             std::string path = m_doors[i].path; // copy it first
-            Load(path);                          // now safe
+            Load(path);                        // now safe
+            if (rand() % 100 >= 20){
+                m_player -> Healing();
+                printf("You healed\n");
+            }
             return;                              // stop iterating, doors are gone
         }
     }
