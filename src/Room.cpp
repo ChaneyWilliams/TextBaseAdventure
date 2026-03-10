@@ -229,7 +229,6 @@ void Room::TrySpawnChest()
 
 void Room::Combat(Vec2 _pos)
 {
-    printf("Hello");
     Monster *fighter = nullptr;
 
     for (Monster *monster : m_monsters)
