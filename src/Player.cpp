@@ -122,3 +122,8 @@ void Player:: Healing()
     health += 20;
 }
 
+void Player :: Level()
+{
+    level += 1;
+}
+

@@ -188,7 +188,7 @@ void Room::OpenDoor(Vec2 _pos)
             std::string path = m_doors[i].path; // copy it first
             Load(path);                        // now safe
             if (rand() % 100 >= 20){
-                //m_player -> Healing();
+                m_player -> Healing();
                 printf("You healed\n");
             }
             return;                              // stop iterating, doors are gone
@@ -250,7 +250,12 @@ void Room::Combat(Vec2 _pos)
     printf("FIGHT\n");
     while (m_player->health > 0 && fighter->health > 0)
     {
-        RollStats playerRoll = RollDice(m_player->dice);
+       RollStats playerRoll;
+       for (int i = m_player->level; i >= 0; i--)
+       {
+            playerRoll = RollDice(m_player->dice);
+       }
+
         RollStats monsterRoll = RollDice(fighter->dice);
         printf("Player: %i, Monster %i\n", playerRoll.total + m_player->strength, monsterRoll.total + fighter->strength);
 
@@ -284,13 +289,20 @@ void Room::Combat(Vec2 _pos)
     if(m_player->health <= 0){
         m_player->Death();
     }
-    else{
-        m_player->gold += rand() % 11;
-        //m_player->strength++;
-        printf("Player Won!\nLevel Up!\nStrength: %i\n", m_player->strength);
-        printf("Player Current Health: %i\nPlayer Got Gold: %i\n", m_player->health, m_player->gold);
-        do{
-            leave = request_char("Press c to continue");
-        }while(leave != 'c');
+    
+    m_player->gold += rand() % 11;
+    m_player->strength++;
+    if (m_player->strength % 5 == 0)
+    {
+        m_player->Level();
+        printf("Player Won!\nLevel Up: %i\nStrength: %i\n", m_player->level, m_player->strength);
     }
-}
+    else
+    {
+        printf("Player Won!\nStrength: %i\n", m_player->strength);
+    }
+    printf("Player Current Health: %i\nPlayer Got Gold: %i\n", m_player->health, m_player->gold);
+    do{
+        leave = request_char("Press c to continue");
+    }while(leave != 'c');
+    }
